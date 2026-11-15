@@ -1,0 +1,148 @@
+{
+  "title": "The Locked Library",
+  "intro": "You wake up on the cold floor of a locked library. Dust hangs in the lamplight. You can see a desk, a bookshelf, a painting and a heavy door with a four-digit keypad. Type what you want to do, for example: examine the bookshelf.",
+  "secrets": {
+    "always_hidden": ["4096"],
+    "hidden_until_revealed": ["2718", "40", "96"]
+  },
+  "objects": {
+    "desk": {
+      "name": "desk",
+      "aliases": ["desk", "writing desk", "table"],
+      "visible_at_start": true,
+      "examine": [
+        {"text": "A heavy oak desk with a green lamp and an empty inkwell. Under the blotter you spot a small drawer with a four-digit combination lock.", "set_flags": ["desk_examined"], "reveals": ["drawer"]}
+      ]
+    },
+    "bookshelf": {
+      "name": "bookshelf",
+      "aliases": ["bookshelf", "shelf", "shelves", "bookcase"],
+      "visible_at_start": true,
+      "examine": [
+        {"text": "Hundreds of dusty volumes fill the shelves. Four red-spined books stand out: they are shelved upside down.", "set_flags": ["bookshelf_examined"], "reveals": ["red_books"]}
+      ]
+    },
+    "red_books": {
+      "name": "four red books",
+      "aliases": ["red books", "four books", "those books", "the books", "books", "red-spined books", "upside down books"],
+      "visible_at_start": false,
+      "examine": [
+        {"text": "Each red book has a handwritten number inked inside its cover. In shelf order they read: 2, 7, 1, 8.", "set_flags": ["books_examined"], "reveals_secrets": ["2718"]}
+      ]
+    },
+    "painting": {
+      "name": "painting",
+      "aliases": ["painting", "picture", "seascape", "canvas"],
+      "visible_at_start": true,
+      "examine": [
+        {"if_flags": ["painting_moved"], "text": "The stormy seascape now hangs open on its hinge, exposing a small steel safe."},
+        {"text": "A stormy seascape in a heavy gilt frame. It hangs slightly crooked, as if it has been moved before.", "set_flags": ["painting_examined"]}
+      ],
+      "move": [
+        {"if_flags": ["painting_moved"], "text": "The painting is already swung aside."},
+        {"text": "You swing the painting aside on a hidden hinge. Behind it is a small steel safe with a keyhole.", "set_flags": ["painting_moved"], "reveals": ["safe"]}
+      ]
+    },
+    "safe": {
+      "name": "steel safe",
+      "aliases": ["safe", "steel safe", "wall safe", "keyhole"],
+      "visible_at_start": false,
+      "examine": [
+        {"if_flags": ["safe_open"], "text": "The safe stands open. Inside lies a small card."},
+        {"text": "A small steel safe set into the wall. It has a keyhole and no dial."}
+      ],
+      "open": [
+        {"if_flags": ["safe_open"], "text": "The safe is already open."}
+      ],
+      "open_fail": "The safe is locked. It has a keyhole."
+    },
+    "drawer": {
+      "name": "drawer",
+      "aliases": ["drawer", "small drawer", "locked drawer"],
+      "visible_at_start": false,
+      "examine": [
+        {"if_flags": ["drawer_open"], "text": "The drawer is open. Inside are a brass key and a folded letter."},
+        {"text": "A small drawer with a four-digit combination lock. It is locked."}
+      ],
+      "open": [
+        {"if_flags": ["drawer_open"], "text": "The drawer is already open."}
+      ],
+      "open_fail": "The drawer is locked. It needs a four-digit code.",
+      "lock": {
+        "code": "2718",
+        "requires_flags": ["books_examined"],
+        "set_flags": ["drawer_unlocked", "drawer_open"],
+        "done_flag": "drawer_open",
+        "success": "The wheels click into place and the drawer slides open. Inside are a brass key and a folded letter.",
+        "fail": "The wheels spin but the drawer stays locked. That is not the right code."
+      }
+    },
+    "door": {
+      "name": "door",
+      "aliases": ["door", "exit", "keypad", "heavy door"],
+      "visible_at_start": true,
+      "examine": [
+        {"text": "A heavy oak door with a four-digit keypad. A red light shows that it is locked."}
+      ],
+      "open_fail": "The door will not move. The keypad light is red.",
+      "lock": {
+        "code": "4096",
+        "requires_flags": ["card_read", "letter_read"],
+        "set_flags": ["door_unlocked"],
+        "done_flag": "door_unlocked",
+        "ends_game": true,
+        "success": "The keypad chirps, the red light turns green and the heavy door swings open. Cool night air rushes in. You are free.",
+        "fail": "The keypad buzzes angrily. That is not the right code."
+      }
+    }
+  },
+  "items": {
+    "brass_key": {
+      "name": "brass key",
+      "aliases": ["brass key", "key", "small key"],
+      "available_when": "drawer_open",
+      "take_text": "You take the brass key and slip it into your pocket.",
+      "examine": [
+        {"text": "A small brass key with a tiny engraved anchor. It looks like it would fit a keyhole."}
+      ]
+    },
+    "letter": {
+      "name": "folded letter",
+      "aliases": ["letter", "folded letter", "note", "paper"],
+      "available_when": "drawer_open",
+      "take_text": "You take the folded letter.",
+      "examine": [
+        {"text": "The letter is written in a shaky hand: \"The last two digits of the way out are 96.\"", "set_flags": ["letter_read"], "reveals_secrets": ["96"]}
+      ]
+    },
+    "card": {
+      "name": "small card",
+      "aliases": ["card", "small card", "index card"],
+      "available_when": "safe_open",
+      "take_text": "You take the small card from the safe.",
+      "examine": [
+        {"text": "The card reads: \"The first two digits of the way out are 40.\"", "set_flags": ["card_read"], "reveals_secrets": ["40"]}
+      ]
+    }
+  },
+  "use_rules": [
+    {
+      "item": "brass_key",
+      "target": "safe",
+      "done_flag": "safe_open",
+      "done_text": "The safe is already open.",
+      "text": "The brass key turns with a soft click and the safe door swings open. Inside lies a small card.",
+      "set_flags": ["safe_open"]
+    }
+  ],
+  "hints": [
+    {"not_flags": ["desk_examined", "bookshelf_examined"], "text": "Start by examining the objects in the room: the desk, the bookshelf, the painting."},
+    {"not_flags": ["books_examined"], "if_flags": ["bookshelf_examined"], "text": "Those upside-down books look deliberate. Look at them closely."},
+    {"not_flags": ["drawer_open"], "text": "The drawer has a four-digit lock. Something in the room may supply the digits."},
+    {"not_flags": ["painting_moved"], "text": "The painting hangs oddly. Maybe something is behind it."},
+    {"not_flags": ["safe_open"], "text": "The safe has a keyhole. Did you find a key?"},
+    {"not_flags": ["letter_read"], "text": "Have you read the letter from the drawer?"},
+    {"not_flags": ["card_read"], "text": "Have you read the card from the safe?"},
+    {"text": "You have both halves of the exit code. Enter the full four digits on the door."}
+  ]
+}
